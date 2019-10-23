@@ -29,7 +29,7 @@ def get_int_vlan_map(config_filename):
 	for line in data:
 		if line.startswith('interface '):
 			temp = (line.strip())[10:]
-			continue
+			#continue
 		elif line.startswith(' switchport access vlan'):
 			access_dict[temp] = int(line[23:-1])
 		elif line.startswith(' switchport trunk allowed vlan'):
