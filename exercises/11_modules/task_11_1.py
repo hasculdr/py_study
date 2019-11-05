@@ -28,3 +28,25 @@ R6           Fa 0/2          143           R S I           2811       Fa 0/0
 Ограничение: Все задания надо выполнять используя только пройденные темы.
 '''
 
+def parse_cdp_neighbors(command_output):
+	cdp_list_cleared = []
+	cdp_list_of_lists = []
+	result_dict = {}
+	list_for_dict = command_output.split('>')
+	dict_key = list_for_dict[0].strip()
+	cdp_list = list_for_dict[1].split('\n')
+	for elem in cdp_list:
+		if '/' in elem:
+			cdp_list_cleared.append(elem)
+		else:
+			continue
+	for elem in cdp_list_cleared:
+		cdp_list_of_lists.append(elem.split())
+	for elem in cdp_list_of_lists:
+		key_list = [dict_key, elem[1]+elem[2]]
+		value_list = [elem[0], elem[-2]+elem[-1]]
+		result_dict[tuple(key_list)] = tuple(value_list)
+	return result_dict
+command_output = open('sh_cdp_n_sw1.txt', 'r').read()
+print(parse_cdp_neighbors(command_output))
+
