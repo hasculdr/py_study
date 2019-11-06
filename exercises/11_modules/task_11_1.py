@@ -47,6 +47,7 @@ def parse_cdp_neighbors(command_output):
 		value_list = [elem[0], elem[-2]+elem[-1]]
 		result_dict[tuple(key_list)] = tuple(value_list)
 	return result_dict
-command_output = open('sh_cdp_n_sw1.txt', 'r').read()
-print(parse_cdp_neighbors(command_output))
+if __name__ == "__main__":
+	command_output = open('sh_cdp_n_sw1.txt', 'r').read()
+	print(parse_cdp_neighbors(command_output))
 
