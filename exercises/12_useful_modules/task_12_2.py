@@ -30,4 +30,19 @@
  '172.21.41.129', '172.21.41.130', '172.21.41.131', '172.21.41.132']
 
 '''
+unformated_list = ['8.8.4.4', '1.1.1.1-3', '172.21.41.128-172.21.41.132']
 
+def convert_ranges_to_ip_list(unformated_list):
+	formated_list = list()
+	for elem in unformated_list:
+		if '-' not in elem:
+			formated_list.append(elem)
+		else:
+			temp_list = elem.split('-')
+			begin_range = (temp_list[0].split('.'))[-1]
+			end_range = (temp_list[-1].split('.'))[-1]
+			for elem in range(int(begin_range), int(end_range)+1):
+				formated_list.append(f'{(temp_list[0].split("."))[0]}.{(temp_list[0].split("."))[1]}.{(temp_list[0].split("."))[2]}.{elem}')
+	return(formated_list)
+if __name__ == "__main__":
+	print(convert_ranges_to_ip_list(unformated_list))
