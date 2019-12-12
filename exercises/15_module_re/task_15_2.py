@@ -26,7 +26,6 @@ def parse_sh_ip_int_br(brief_output):
 	with open(brief_output, 'r') as ip_intf_brief:
 		data = ip_intf_brief.read()
 		regex = r'(\S+)\s+(\d+\.\d+\.\d+\.\d+|unassigned)\s+\w+\s+\w+\s+(up|(?:administratively )?down)\s+(\w+)'
-	#return(re.findall(regex, data))
 	values = re.findall(regex, data)
 	return(values)
 if __name__ == "__main__":
