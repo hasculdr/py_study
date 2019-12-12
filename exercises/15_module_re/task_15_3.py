@@ -42,6 +42,6 @@ def convert_ios_nat_to_asa(nat, asa):
 	with open(asa, 'w') as asa_list:
 		for elem in values:
 			asa_list.write(f'object network LOCAL_{elem[4]}\n host {elem[4]}\n {elem[0]} (inside,outside) {elem[2]} interface service {elem[3]} {elem[5]} {elem[6]}\n')
-print(convert_ios_nat_to_asa('cisco_nat_config.txt', '15_3_output.txt'))	
+print(convert_ios_nat_to_asa('cisco_nat_config.txt', '15_3_output.txt'))
 	
 	

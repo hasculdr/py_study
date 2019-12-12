@@ -24,3 +24,19 @@ description Connected to SW1 port Eth 0/1
 
 Проверить работу функции на файле sh_cdp_n_sw1.txt.
 '''
+import re
+def generate_description_from_cdp(cdp_neighbors_file):
+	with open(cdp_neighbors_file, 'r') as text:
+		data = text.read()
+	regexp = (r'(\S+)\s+'#Device ID
+			  r'(\w+ \S+)\s+'#Local Intrfce
+			  r'(?:\d+)\s+'#Holdtme
+			  r'(?:\w\s?)+\s+'#Capability
+			  r'(?:\S+)\s+'#Platform
+			  r'(\w+ \S+)')#Port ID
+	matches = re.findall(regexp, data)
+	dict_descr = {}
+	for elem in matches:
+		dict_descr[elem[1]] = f'description Connected to {elem[0]} port {elem[2]}'
+	return(dict_descr)
+print(generate_description_from_cdp('sh_cdp_n_sw1.txt'))

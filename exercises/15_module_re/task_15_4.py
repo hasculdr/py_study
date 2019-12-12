@@ -22,4 +22,15 @@ interface Loopback0
 
 Проверить работу функции на примере файла config_r1.txt.
 '''
-
+import re
+def get_ints_without_description(config_file):
+	regexp = r'\ninterface (\S+)\n (\w+)'
+	intf_witgout_descr = []
+	with open(config_file, 'r') as config:
+		text = config.read()
+	matched_values = re.findall(regexp, text)
+	for elem in matched_values:
+		if 'description' not in elem:
+			intf_witgout_descr.append(elem[0])
+	return(intf_witgout_descr)
+print(get_ints_without_description('config_r1.txt'))
