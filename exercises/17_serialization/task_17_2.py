@@ -24,3 +24,21 @@ R6           Fa 0/2          143           R S I           2811       Fa 0/0
 
 Проверить работу функции на содержимом файла sh_cdp_n_sw1.txt
 '''
+import re
+with open('sh_cdp_n_sw1.txt', 'r') as data:
+	show_cdp_neighbors_str = data.read()
+def parse_sh_cdp_neighbors(show_cdp_neighbors_str):
+	hostname = (re.match(r'.+?(\S+?)>', show_cdp_neighbors_str, re.DOTALL)).group(1)#имя узла, где выполнена show cdp neighbors
+	neighbors = (r'(\w+?\d+?)\s+?'#имя соседа Device ID
+				 r'(\w+?\s\S+?)\s+?'#порт, на котором сосед найден Local Intrfce
+				 r'\d+?\s+?(?:\w\s+)+?\s+?\d+?\s+?'#мусор (3-5 колонки)
+				 r'(\w+?\s\S+)')#порт соседа Port ID
+	match = re.findall(neighbors, show_cdp_neighbors_str, re.DOTALL)
+	neighbors_dict = {}#итоговай словарь для функции
+	neighbors_subdict = {}#словарь, вложенный в итоговый
+	neighbors_dict[hostname] = neighbors_subdict#засовываем в итоговый словарь вложенный 
+	for elem in match:
+		neighbors_subdict.update({elem[1]: {elem[0]: elem[2]}})#заполняем вложенный словарь по количеству соседей
+	return(neighbors_dict)
+if __name__ == "__main__":
+	print(parse_sh_cdp_neighbors(show_cdp_neighbors_str))
