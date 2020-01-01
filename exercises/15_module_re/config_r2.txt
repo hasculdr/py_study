@@ -69,6 +69,7 @@ interface Ethernet0/0
 interface Ethernet0/1
  ip address 10.255.2.2 255.255.255.0
  ip address 10.254.2.2 255.255.255.0 secondary
+ ip address 192.168.1.1 255.255.255.0 secondary
 !
 interface Ethernet0/2
  description To P_r9 Ethernet0/2

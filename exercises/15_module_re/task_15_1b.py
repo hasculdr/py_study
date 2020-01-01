@@ -24,21 +24,26 @@ Ethernet0/1 соответствует список из двух кортеже
 
 '''
 import re
+from pprint import pprint
 def get_ip_from_cfg(config):
 	with open(config, 'r') as config_file:
 		data = config_file.read()
-		regex = (r'interface (\S+)\n'#сохраняем имя интерфейса
-				r'(?: .+?\n)*?'#не_сохраняем возможные команды (встречаются 0 и более раз),
-				r'(?: ip address (\d+\.\d+\.\d+\.\d+) (\d+\.\d+\.\d+\.\d+).*?\n)'#кроме группировок из команд, начинающихся с "ip address"
-				r'(?: ip address (\d+\.\d+\.\d+\.\d+) (\d+\.\d+\.\d+\.\d+).*?\n)?')#костыль на один secondary-адрес
-		tuple_list = re.findall(regex, data)
+		regex_intf_conf = r'\ninterface \S+?.+?!'#сохраняем конфиги интерфейсов
+		regex_intf_name = r'interface (\S+)'#сохраняем имена интерфейсов
+		regex_intf_addr = r'ip address (\d+\.\d+\.\d+\.\d+) (\d+\.\d+\.\d+\.\d+).*\n?'#сохраняем ip-адреса
+		intf_conf = re.findall(regex_intf_conf, data, re.DOTALL)
+		intf_name = []#для добавления совпадений имен интерфейсов в цикле
+		intf_addr = []#аналогично для ip-адресов
+		for elem in intf_conf:
+			intf_name.append(re.findall(regex_intf_name, elem))
+			intf_addr.append(re.findall(regex_intf_addr, elem))
+		temp_var = list(zip(intf_name, intf_addr))
 		output_dict = {}
-		for elem in tuple_list:
-			if '' in elem:
-				output_dict[elem[0]] = [(elem[1], elem[2])]
+		for elem in temp_var:
+			if [] in elem:	
+				continue
 			else:
-				output_dict[elem[0]] = [(elem[1], elem[2]), (elem[3], elem[4])]
+				output_dict[str(elem[0][0])] = list(elem[1])#выковыриваем неадекватно вложенный ключ (ключ в списке, список в кортеже) 
 		return(output_dict)
-		#return(tuple_list)
 if __name__ == "__main__":
-	print(get_ip_from_cfg('config_r2.txt'))
+	pprint(get_ip_from_cfg('config_r2.txt'))
