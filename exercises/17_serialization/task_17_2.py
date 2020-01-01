@@ -25,6 +25,7 @@ R6           Fa 0/2          143           R S I           2811       Fa 0/0
 Проверить работу функции на содержимом файла sh_cdp_n_sw1.txt
 '''
 import re
+from pprint import pprint
 with open('sh_cdp_n_sw1.txt', 'r') as data:
 	show_cdp_neighbors_str = data.read()
 def parse_sh_cdp_neighbors(show_cdp_neighbors_str):
@@ -41,4 +42,4 @@ def parse_sh_cdp_neighbors(show_cdp_neighbors_str):
 		neighbors_subdict.update({elem[1]: {elem[0]: elem[2]}})#заполняем вложенный словарь по количеству соседей
 	return(neighbors_dict)
 if __name__ == "__main__":
-	print(parse_sh_cdp_neighbors(show_cdp_neighbors_str))
+	pprint(parse_sh_cdp_neighbors(show_cdp_neighbors_str))
