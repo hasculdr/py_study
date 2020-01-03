@@ -50,4 +50,5 @@ def generate_topology_from_cdp(list_of_files, save_to_filename = None):
 			yaml.dump(output_dict, data)
 	else:
 		return(output_dict)
-pprint(generate_topology_from_cdp(neighbors_files, 'topology.yaml'))
+if __name__ == "__main__":
+	pprint(generate_topology_from_cdp(neighbors_files, 'topology.yaml'))
