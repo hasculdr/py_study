@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Задание 19.2
@@ -40,5 +41,19 @@ R1#
 
 Скрипт должен отправлять команду command на все устройства из файла devices.yaml с помощью функции send_config_commands.
 """
+import yaml
+from netmiko import ConnectHandler
 
 commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
+
+def send_config_commands(device, config_commands):
+	print(f'Соединяюсь с устройством {device["host"]}')
+	with ConnectHandler (**device) as ssh_session:
+		ssh_session.enable()
+		return(ssh_session.send_config_set(config_commands))
+
+if __name__ == "__main__":
+	with open('devices.yaml', 'r') as f:
+		device_list = yaml.safe_load(f)
+		for device in device_list:
+			print(send_config_commands(device, commands))
