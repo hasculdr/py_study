@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 Задание 19.2b
 
 Скопировать функцию send_config_commands из задания 19.2a и добавить проверку на ошибки.
@@ -12,8 +12,8 @@
 о том, какая ошибка возникла, при выполнении какой команды и на каком устройстве, например:
 Команда "logging" выполнилась с ошибкой "Incomplete command." на устройстве 192.168.100.1
 
-Ошибки должны выводиться всегда, независимо от значения параметра verbose.
-При этом, verbose по-прежнему должен контролировать будет ли выводиться сообщение:
+Ошибки должны выводиться всегда, независимо от значения параметра log.
+При этом, параметр log по-прежнему должен контролировать будет ли выводиться сообщение:
 Подключаюсь к 192.168.100.1...
 
 
@@ -34,7 +34,7 @@ In [16]: commands
 Out[16]:
 ['logging 0255.255.1',
  'logging',
- 'i',
+ 'a',
  'logging buffered 20010',
  'ip http server']
 
@@ -42,7 +42,7 @@ In [17]: result = send_config_commands(r1, commands)
 Подключаюсь к 192.168.100.1...
 Команда "logging 0255.255.1" выполнилась с ошибкой "Invalid input detected at '^' marker." на устройстве 192.168.100.1
 Команда "logging" выполнилась с ошибкой "Incomplete command." на устройстве 192.168.100.1
-Команда "i" выполнилась с ошибкой "Ambiguous command:  "i"" на устройстве 192.168.100.1
+Команда "a" выполнилась с ошибкой "Ambiguous command:  "a"" на устройстве 192.168.100.1
 
 In [18]: pprint(result, width=120)
 ({'ip http server': 'config term\n'
@@ -53,10 +53,10 @@ In [18]: pprint(result, width=120)
                             'Enter configuration commands, one per line.  End with CNTL/Z.\n'
                             'R1(config)#logging buffered 20010\n'
                             'R1(config)#'},
- {'i': 'config term\n'
+ {'a': 'config term\n'
        'Enter configuration commands, one per line.  End with CNTL/Z.\n'
-       'R1(config)#i\n'
-       '% Ambiguous command:  "i"\n'
+       'R1(config)#a\n'
+       '% Ambiguous command:  "a"\n'
        'R1(config)#',
   'logging': 'config term\n'
              'Enter configuration commands, one per line.  End with CNTL/Z.\n'
@@ -78,7 +78,7 @@ In [20]: good.keys()
 Out[20]: dict_keys(['logging buffered 20010', 'ip http server'])
 
 In [21]: bad.keys()
-Out[21]: dict_keys(['logging 0255.255.1', 'logging', 'i'])
+Out[21]: dict_keys(['logging 0255.255.1', 'logging', 'a'])
 
 
 Примеры команд с ошибками:
@@ -89,12 +89,12 @@ R1(config)#logging 0255.255.1
 R1(config)#logging
 % Incomplete command.
 
-R1(config)#i
-% Ambiguous command:  "i"
-'''
+R1(config)#a
+% Ambiguous command:  "a"
+"""
 
 # списки команд с ошибками и без:
-commands_with_errors = ['logging 0255.255.1', 'logging', 'i']
-correct_commands = ['logging buffered 20010', 'ip http server']
+commands_with_errors = ["logging 0255.255.1", "logging", "a"]
+correct_commands = ["logging buffered 20010", "ip http server"]
 
 commands = commands_with_errors + correct_commands
