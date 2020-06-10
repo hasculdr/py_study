@@ -28,13 +28,9 @@ commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging consol
 def send_config_commands(device, config_commands, log=True):
 	if log==True:
 		print(f'Соединяюсь с устройством {device["host"]}')
-		with ConnectHandler (**device) as ssh_session:
-			ssh_session.enable()
-			return(ssh_session.send_config_set(config_commands))
-	else:
-		with ConnectHandler (**device) as ssh_session:
-			ssh_session.enable()
-			return(ssh_session.send_config_set(config_commands))
+	with ConnectHandler (**device) as ssh_session:
+		ssh_session.enable()
+		return(ssh_session.send_config_set(config_commands))
 
 if __name__ == "__main__":
 	with open('devices.yaml', 'r') as f:
