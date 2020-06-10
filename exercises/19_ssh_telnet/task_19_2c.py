@@ -54,3 +54,36 @@ commands_with_errors = ["logging 0255.255.1", "logging", "a"]
 correct_commands = ["logging buffered 20010", "ip http server"]
 
 commands = commands_with_errors + correct_commands
+
+import yaml
+from netmiko import ConnectHandler
+from pprint import pprint
+import re
+
+def send_config_commands(device, config_commands, log=True):
+	error_commands=dict()
+	normal_commands=dict()
+	if log==True:
+		print(f'Соединяюсь с устройством {device["host"]}...')
+	with ConnectHandler (**device) as ssh_session:
+			ssh_session.enable()
+			for command in config_commands:
+				result = ssh_session.send_config_set(command) #сохраняем вывод команды для анализа
+				err = re.search(r'(%.*)\n', result) #анализируем, перенос строки \n не сохраняется при нахождении совпадений
+				if err == None: #если совпадений не найдено
+					normal_commands[command] = result #команда записывается в словарь_без_ошибок
+				else: #если совпадение есть
+					print(f'Команда \"{command}\" выполнилась с ошибкой \"{err.group(1)}\" на устройстве {device["host"]}')
+					choise = input('Продолжать выполнять команды? [y]/n: ')
+					if 'n' in choise or 'no' in choise:
+						error_commands[command] = result #команда записывается в словарь_с_ошибками
+						break
+					else:
+						error_commands[command] = result #команда записывается в словарь_с_ошибками
+	return(normal_commands, error_commands)
+		
+if __name__ == "__main__":
+	with open('devices.yaml', 'r') as f:
+		device_list = yaml.safe_load(f)
+		for device in device_list:
+			pprint(send_config_commands(device, commands))
