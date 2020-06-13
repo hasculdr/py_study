@@ -31,6 +31,25 @@ In [15]: send_commands(r1, config=['username user5 password pass5', 'username us
 Out[15]: 'config term\nEnter configuration commands, one per line.  End with CNTL/Z.\nR1(config)#username user5 password pass5\nR1(config)#username user6 password pass6\nR1(config)#end\nR1#'
 
 """
+from netmiko import ConnectHandler
+from pprint import pprint
+from task_19_1 import send_show_command
+from task_19_2 import send_config_commands
+import yaml
 
 commands = ["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
 command = "sh ip int br"
+
+def send_commands(device, show=None, config=None):
+	if show != None and config == None:
+		return(send_show_command(device, command))
+	elif config != None and show == None:
+		return(send_config_commands(device, commands))
+	else:
+		return("Должен быть указан ОДИН аргумент - show ИЛИ config")
+
+if __name__ == "__main__":
+	with open('devices.yaml', 'r') as f:
+		device_list = yaml.safe_load(f)
+		for device in device_list:
+			pprint(send_commands(device, config=commands))
