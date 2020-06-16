@@ -33,3 +33,36 @@ Ethernet0/1                unassigned      YES NVRAM  administratively down down
 
 Проверить работу функции на устройствах из файла devices.yaml
 """
+import yaml
+from netmiko import ConnectHandler
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
+
+def send_show_command(device, command):
+	with ConnectHandler(**device) as ssh_session: #открываем ssh-соединение параметры распаковываем из словаря в yaml-файле
+		ssh_session.enable() #переход в режим enable
+		prompt=ssh_session.find_prompt()  # определяем и сохраняем приглашение командной строки
+		result=ssh_session.send_command(command)  #сохраняем выполнение команды
+		return(prompt+command+'\n', result+'\n') #возвращаем имя хоста и команду, символы переноса строки - костыль
+
+
+def send_show_command_to_devices(devices, command, filename, limit=3):
+	with ThreadPoolExecutor(max_workers=limit) as executor:
+		future_list=[]
+		for device in devices:	
+			future_object=executor.submit(send_show_command, device, command)
+			future_list.append(future_object)
+	with open(filename, 'w') as o_f:
+		for future_object in as_completed(future_list):
+			o_f.writelines(future_object.result())
+
+
+if __name__=="__main__":
+	start_time=datetime.now()
+	command='sh ip int br'
+	filename='task_20_2_output.txt'
+	with open('devices.yaml','r') as i_f:
+		devices=yaml.safe_load(i_f)
+		for device in devices:
+			send_show_command_to_devices(devices, command, filename)
+	print(datetime.now()-start_time)
