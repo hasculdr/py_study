@@ -37,12 +37,20 @@ import yaml
 from netmiko import ConnectHandler
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
+import logging
+
+logging.getLogger("paramiko").setLevel(logging.INFO)
+logging.basicConfig(format='%(threadName)s %(name)s %(levelname)s: %(message)s',
+					level=logging.INFO)
 
 def send_show_command(device, command):
+	ip = device["host"]
+	logging.info(f'===> {datetime.now().time} Connection:   {ip}')
 	with ConnectHandler(**device) as ssh_session: #открываем ssh-соединение параметры распаковываем из словаря в yaml-файле
 		ssh_session.enable() #переход в режим enable
 		prompt=ssh_session.find_prompt()  # определяем и сохраняем приглашение командной строки
 		result=ssh_session.send_command(command)  #сохраняем выполнение команды
+		logging.info(f'<=== {datetime.now().time} Received:   {ip}')
 		return(prompt+command+'\n', result+'\n') #возвращаем имя хоста и команду, символы переноса строки - костыль
 
 
@@ -63,6 +71,5 @@ if __name__=="__main__":
 	filename='task_20_2_output.txt'
 	with open('devices.yaml','r') as i_f:
 		devices=yaml.safe_load(i_f)
-		for device in devices:
-			send_show_command_to_devices(devices, command, filename)
+		send_show_command_to_devices(devices, command, filename)
 	print(datetime.now()-start_time)

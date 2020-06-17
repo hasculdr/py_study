@@ -23,3 +23,45 @@
 а затем запустить эту функцию в разных потоках для разных
 IP-адресов с помощью concurrent.futures (это надо сделать в функции ping_ip_addresses).
 """
+import subprocess
+
+import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def ping(addr):
+	reply = subprocess.run(['ping', '-c', '3', '-n', addr], stdout=subprocess.DEVNULL)  # отключаем вывод STDOUT
+	if reply.returncode==0:
+		return(addr, True)
+	else:
+		return(addr, False)
+
+		
+def ping_ip_addresses(ip_list, limit=3):
+	alive=[]
+	unreachable=[]
+	future_list=[]
+	with ThreadPoolExecutor(max_workers=limit) as executor:
+		for addr in ip_list:
+			future_object=executor.submit(ping, addr)  # передаем методу submit функцию ping и ее аргумент, получаем future-объект
+			future_list.append(future_object)  # добавляем этот объект в список
+		for future_object in as_completed(future_list):	 # перебираем future-объекты в полученном списке с помощью функции as_completed
+			# распаковываем future-объект (ip-адрес, доступен/недоступен),
+			# нужно для корректной работы с as_completed, т.к. она не учитывает
+			# порядок завершения задач и результат будет "перемешан"
+			ip, status = future_object.result()
+			if status==True:
+				alive.append(ip)
+			else:
+				unreachable.append(ip)
+	return(alive, unreachable)
+
+
+if __name__=="__main__":
+	ip_list=[]
+	with open('devices.yaml', 'r') as f:
+		device_list=yaml.safe_load(f)
+		for device in device_list:
+			ip_list.append(device['host'])
+		print(ping_ip_addresses(ip_list))
+
+

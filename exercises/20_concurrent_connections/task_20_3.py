@@ -37,9 +37,41 @@ router ospf 1
 
 Проверить работу функции на устройствах из файла devices.yaml и словаре commands
 """
+import yaml
+from netmiko import ConnectHandler
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-commands = {
-    "192.168.100.3": "sh run | s ^router ospf",
-    "192.168.100.1": "sh ip int br",
-    "192.168.100.2": "sh int desc",
-}
+def send_show_command(device, command):
+	with ConnectHandler(**device) as ssh_session:
+		ssh_session.enable()
+		prompt=ssh_session.find_prompt()
+		run_show_command=ssh_session.send_command(command)
+		result=(prompt+command+'\n', run_show_command+'\n')
+	return(result)
+	
+
+def send_command_to_devices(devices, commands_dict, filename, limit=3):
+	with ThreadPoolExecutor(max_workers=limit) as executor:
+		future_list=[]
+		for device in devices:
+			ip=device['host']  #получаем ip-адрес из словаря для подключений
+			command=commands_dict[ip]  #используем его как ключ для словаря с командами, получаем оттуда соответствующую команду
+			future_object=executor.submit(send_show_command, device, command)  #передаем функцию,ключ пары (ip-адрес), значение пары (команда)
+			future_list.append(future_object)
+		with open(filename, 'w') as f:
+			for future_object in as_completed(future_list):
+				f.writelines(future_object.result())
+	return(None)
+			
+			
+commands = {"192.168.100.3": "sh run | s ^router ospf",
+			"192.168.100.1": "sh ip int br",
+			"192.168.100.2": "sh int desc"}
+
+filename='task_20_3_output.txt'
+
+
+if __name__=="__main__":
+	with open('devices.yaml', 'r') as f:
+		devices=yaml.safe_load(f)
+		send_command_to_devices(devices, commands, filename)
