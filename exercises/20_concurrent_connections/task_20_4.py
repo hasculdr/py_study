@@ -86,3 +86,49 @@ R3#
 
 Для выполнения задания можно создавать любые дополнительные функции.
 """
+from netmiko import ConnectHandler
+from pprint import pprint
+import yaml
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+
+def send_show_command(device, show):
+	with ConnectHandler(**device) as ssh_session:
+		ssh_session.enable()
+		prompt=ssh_session.find_prompt()
+		run_show_command=ssh_session.send_command(show)
+		result=(prompt+show+'\n', run_show_command+'\n')
+	return(result)
+
+def send_config_commands(device, config):
+	with ConnectHandler (**device) as ssh_session:
+		ssh_session.enable()
+		run_set_command=ssh_session.send_config_set(config)
+		result=(run_set_command+'\n')
+	return(result)
+
+def send_commands_to_devices(devices, filename, show=None, config=None, limit=3):
+	with ThreadPoolExecutor(max_workers=limit) as executor:
+		future_list=[]
+		for device in devices:
+			if show != None and config == None:
+				future_object=executor.submit(send_show_command, device, show)
+				future_list.append(future_object)
+			elif config != None and show == None:
+				future_object=executor.submit(send_config_commands, device, config)
+				future_list.append(future_object)
+			else:
+				print("Должен быть указан ОДИН аргумент - show ИЛИ config")
+	with open(filename, 'w') as f:
+		for elem in as_completed(future_list):
+			f.writelines(elem.result())
+	return(None)
+
+filename="task_20_4_output.txt"
+config=["logging 10.255.255.1", "logging buffered 20010", "no logging console"]
+show="sh ip int br"
+
+if __name__=="__main__":
+	with open('devices.yaml', 'r') as f:
+		devices=yaml.safe_load(f)
+		send_commands_to_devices(devices, filename, config=config)

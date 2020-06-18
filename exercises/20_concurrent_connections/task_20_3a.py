@@ -47,9 +47,45 @@ O        10.30.0.0/24 [110/20] via 192.168.100.1, 07:12:03, Ethernet0/0
 
 Проверить работу функции на устройствах из файла devices.yaml и словаре commands
 """
+import yaml
+from netmiko import ConnectHandler
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-commands = {
-    "192.168.100.3": ["sh ip int br", "sh ip route | ex -"],
-    "192.168.100.1": ["sh ip int br", "sh int desc"],
-    "192.168.100.2": ["sh int desc"],
-}
+def send_show_command(device, commands):
+	result_list=[]
+	with ConnectHandler(**device) as ssh_session:
+		ssh_session.enable()
+		for elem in commands:
+			prompt=ssh_session.find_prompt()
+			run_show_command=ssh_session.send_command(elem)
+			result=(prompt+elem+'\n', run_show_command+'\n')
+			result_list.append(result)
+	return(result_list)
+	
+
+def send_command_to_devices(devices, commands_dict, filename, limit=3):
+	with ThreadPoolExecutor(max_workers=limit) as executor:
+		future_list=[]
+		for device in devices:
+			ip=device['host']  #получаем ip-адрес из словаря для подключений
+			commands=commands_dict[ip]  #используем его как ключ для словаря с командами, получаем оттуда соответствующие команды
+			future_object=executor.submit(send_show_command, device, commands)  #передаем функцию,ключ пары (ip-адрес), значение пары (команда)
+			future_list.append(future_object)
+		with open(filename, 'w') as f:
+			write_list=[]
+			for future_object in as_completed(future_list):
+				temp_tuple_var=(future_object.result())  #кортежи в файл не записываются, только строки, делаем костыль для каждого кортежа
+				for elem in temp_tuple_var:  # каждый элемент кортежа - строка
+					f.writelines(elem)  # ее и записываем в файл
+	return(None)
+	
+	
+commands = {"192.168.100.3": ["sh ip int br", "sh ip route | ex -"],
+			"192.168.100.1": ["sh ip int br", "sh int desc"],
+			"192.168.100.2": ["sh int desc"]}
+filename='task_20_3a_output.txt'
+
+if __name__=="__main__":
+	with open('devices.yaml', 'r') as f:
+		devices=yaml.safe_load(f)
+		send_command_to_devices(devices, commands, filename)
