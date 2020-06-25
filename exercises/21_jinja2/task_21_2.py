@@ -23,3 +23,13 @@
 В качестве данных, используйте информацию из файла data_files/router_info.yml
 
 """
+from task_21_1 import generate_config
+import yaml
+from jinja2 import Environment, FileSystemLoader
+
+path='templates/cisco_router_base.txt'
+
+if __name__=="__main__":
+	with open('data_files/router_info.yml', 'r') as f:
+		data_dict=yaml.safe_load(f)
+	print(generate_config(path, data_dict))

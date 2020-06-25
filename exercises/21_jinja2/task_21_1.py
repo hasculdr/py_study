@@ -18,14 +18,12 @@ from jinja2 import Environment, FileSystemLoader
 
 
 def generate_config(template, data_dict):
-	template_loader_args=path.split('/')
+	template_loader_args=template.split('/')
 	env=Environment(loader=FileSystemLoader(template_loader_args[0]))
 	template=env.get_template(template_loader_args[1])
 	return(template.render(data_dict))
 
-
 path='templates/for.txt'
-
 
 if __name__=="__main__":
 	with open('data_files/for.yml', 'r') as f:
