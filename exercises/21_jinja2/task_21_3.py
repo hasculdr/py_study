@@ -37,3 +37,13 @@
 
 
 """
+import yaml
+from jinja2 import Environment, FileSystemLoader
+from pprint import pprint
+from task_21_1 import generate_config
+
+path='templates/ospf.txt'
+
+with open('data_files/ospf.yml', 'r') as f:
+	data_dict=yaml.safe_load(f)
+	print(generate_config(path, data_dict))

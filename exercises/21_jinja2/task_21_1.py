@@ -19,7 +19,7 @@ from jinja2 import Environment, FileSystemLoader
 
 def generate_config(template, data_dict):
 	template_loader_args=template.split('/')
-	env=Environment(loader=FileSystemLoader(template_loader_args[0]))
+	env=Environment(loader=FileSystemLoader(template_loader_args[0]), trim_blocks=True, lstrip_blocks=True)
 	template=env.get_template(template_loader_args[1])
 	return(template.render(data_dict))
 
